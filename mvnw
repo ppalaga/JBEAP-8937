@@ -186,18 +186,22 @@ CLASSWORLDS_LAUNCHER=org.codehaus.plexus.classworlds.launcher.Launcher
 
 # traverses directory structure from process work directory to filesystem root
 # first directory with .mvn subdirectory is considered project base directory
-find_maven_basedir() {
+# This used to be implemented as a subroutine but because it did not work on
+# Solaris 10 (Sparc) it is unfolded now.
+if [ -z "${MAVEN_BASEDIR}" ]; then
   basedir="`pwd`"
   wdir="`pwd`"
   while [ "$wdir" != '/' ] ; do
     if [ -d "$wdir"/.mvn ] ; then
-      basedir=$wdir
+      basedir="$wdir"
       break
     fi
     wdir="`(cd "$wdir/.."; pwd)`"
   done
-  echo "${basedir}"
-}
+  export MAVEN_PROJECTBASEDIR="${basedir}"
+else
+  export MAVEN_PROJECTBASEDIR="$MAVEN_BASEDIR"
+fi
 
 # concatenates all lines of a file
 concat_lines() {
@@ -206,11 +210,6 @@ concat_lines() {
   fi
 }
 
-# Workaround for JBEAP-8937 (do not change, it may break on Solaris)
-if [ -z "${MAVEN_PROJECTBASEDIR}" ]; then
-  export MAVEN_PROJECTBASEDIR=`find_maven_basedir`
-fi
-# End of fix
 MAVEN_OPTS="`(concat_lines "$MAVEN_PROJECTBASEDIR/.mvn/jvm.config")` $MAVEN_OPTS"
 
 # For Cygwin, switch paths to Windows format before running java
